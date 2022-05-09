@@ -104,6 +104,7 @@ int main()
 		{
 			cin>>mat[i][j];
 		}
+    }
 	cout<<endl<<" --------Solution------- "<<endl;
 
 	sudokosolver(mat,0,0,9);
