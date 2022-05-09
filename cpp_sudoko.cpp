@@ -1,112 +1,117 @@
-//sudoko solver using c++
-/*#include<bits/stdc++.h>
-using namespace std;
-int main(){
-    
-    return 0;
-}*/
 #include <iostream>
-#include <vector>
+#include <cmath>
 using namespace std;
 
 
-void printSudoku9x9(int arr[9][9]) {
-	cout << "-------------------------" << endl;
-	for (int y = 0; y < 9; y++) {
-		for (int x = 0; x < 9; x++)
-			cout << arr[y][x] << " ";
-		cout << endl;
-	}
-	cout << "-------------------------" << endl;
+bool is_valid(int mat[][9],int i,int j,int num ,int n){
 
-}
+	//row cosr
 
-bool canPlace9x9(int arr[9][9], int row, int col, int n)
-{
-	if (arr[row][col] != 0) return false;
-	bool status = true;
-	int gridx = (col / 3) * 3;
-	int gridy = (row / 3) * 3;
-	for (int i = 0; i < 9; i++) {
-		if (arr[row][i] == n) { status = false; break; }
-		if (arr[i][col] == n) { status = false; break; }
-		if (arr[gridy + i / 3][gridx + i % 3] == n) { status = false; break; }
-	}
-	return status;
-}
-
-void nextEmpty(int arr[9][9], int row, int col, int& rowNext, int& colNext)
-{
-
-	int indexNext = 9 * 9 + 1;
-	for (int i = row * 9 + col + 1; i < 9 * 9; i++) {
-		if (arr[i / 9][i % 9] == 0) {
-
-			indexNext = i;
-			break;
+	for(int k=0;k<n;k++){
+		if(mat[i][k] == num){
+			return false;
 		}
 	}
-	rowNext = indexNext / 9;
-	colNext = indexNext % 9;
-	//cout << row << "," << col << "|" << rowNext << "," << colNext << endl;
-}
 
-void copyArray(int arr[9][9], int arrCpy[9][9]) {
-	for (int y = 0; y < 9; y++)
-		for (int x = 0; x < 9; x++)
-			arrCpy[y][x] = arr[y][x];
-}
-std::vector<int> findPlaceables(int arr[9][9], int row, int col) {
-	vector<int> placebles = {};
-	for (int n = 1; n <= 9; n++)
-		if (canPlace9x9(arr, row, col, n)) placebles.push_back(n);
-	return placebles;
-}
+	//co
 
-
-bool solveSudoku9x9(int arr[9][9], int row, int col)
-{
-	//system("cls");
-	//printSudoku9x9(arr);
-
-	if (row > 8) return true;
-	if (arr[row][col] != 0) {
-		int rowNext, colNext;
-		nextEmpty(arr, row, col, rowNext, colNext);
-		return solveSudoku9x9(arr, rowNext, colNext);
-	}
-
-	std::vector<int> placebles = findPlaceables(arr, row, col);
-
-	if (placebles.size() == 0) {
-		
-		return false; 
-	
-	};
-
-	bool status = false;
-	for (int i = 0; i < placebles.size(); i++) {
-		int n = placebles[i];
-		int arrCpy[9][9];
-		copyArray(arr, arrCpy);
-		//cout << "(" << row << "," << col << ") =>" << n << endl;
-		arrCpy[row][col] = n;
-		int rowNext = row;
-		int colNext = col;
-		nextEmpty(arrCpy, row, col, rowNext, colNext);
-		if (solveSudoku9x9(arrCpy, rowNext, colNext)) {
-			copyArray(arrCpy, arr);
-			status = true;
-			break;
+	for(int k=0;k<n;k++){
+		if(mat[k][j]==num){
+			return false;
 		}
 	}
-	return status;
+
+
+	n = sqrt(n);
+
+	int src = (i/n)*n;
+
+	int scc = (j/n)*n;
+
+	for(int p= src; p< src + n ;p++){
+		for(int q = scc ;q<scc + n;q++){
+			if(mat[p][q] == num){
+				return false;
+			}
+		}
+	}
+
+	return true;
+
 }
 
 
-int main(int argc, char** argv)
+
+bool sudokosolver(int mat[][9],int i,int j,int n){
+
+	//base case
+
+	if(i == n){
+		for(int k = 0;k<n;k++){
+			for(int m=0;m<n;m++){
+				cout<<mat[k][m]<<" ";
+			}
+			cout<<endl;
+		}
+		//cout<<endl;
+
+		return true;
+	}
+
+	if(j==n){
+		return sudokosolver(mat,i+1,0,n);
+	}
+
+	if(mat[i][j]!=0){
+
+		return sudokosolver(mat,i,j+1,n);
+	}
+
+	// ek kamm mereko krna h
+
+	for(int num = 1 ;num<= 9;num++){
+
+		if(is_valid(mat ,i,j,num,n)){
+			mat[i][j] = num;
+
+			bool answer_will = sudokosolver(mat,i,j+1,n);
+
+			if(answer_will){
+				return true;
+			}
+			
+			mat[i][j] = 0;
+
+		}
+	}
+
+	return false;
+
+
+}
+
+int main()
 {
-	int board[9][9] = {
+
+	int mat[9][9];
+	int n; 
+
+	cin>>n;
+
+	for(int i=0;i<n;i++)
+	{
+		for(int j=0;j<n;j++)
+		{
+			cin>>mat[i][j];
+		}
+	}
+cout<<endl<<"answer"<<endl;
+
+	sudokosolver(mat,0,0,9);
+
+	return 0;
+}
+/*
 		{5,3,0,0,7,0,0,0,0},
 		{6,0,0,1,9,5,0,0,0},
 		{0,9,8,0,0,0,0,6,0},
@@ -116,23 +121,15 @@ int main(int argc, char** argv)
 		{0,6,0,0,0,0,2,8,0},
 		{0,0,0,4,1,9,0,0,5},
 		{0,0,0,0,8,0,0,7,9}
-	};
-	int board2[9][9] = {
-		{8,0,0,0,0,0,0,0,0},
-		{0,0,3,6,0,0,0,0,0},
-		{0,7,0,0,9,0,2,0,0},
-		{0,5,0,0,0,7,0,0,0},
-		{0,0,0,0,4,5,7,0,0},
-		{0,0,0,1,0,0,0,3,0},
-		{0,0,1,0,0,0,0,6,8},
-		{0,0,8,5,0,0,0,1,0},
-		{0,9,0,0,0,0,4,0,0}
-	};
-	
-	if (solveSudoku9x9(board, 0, 0)) cout << "successfully solved board!" << std::endl;
-	printSudoku9x9(board);
-	if (solveSudoku9x9(board2, 0, 0)) cout << "successfully solved board 2!" << std::endl;
-	printSudoku9x9(board2);
-
-	return 0;
-}
+*/
+/*
+5 3 4 6 7 8 9 1 2 
+6 7 2 1 9 5 3 4 8 
+1 9 8 3 4 2 5 6 7 
+8 5 9 7 6 1 4 2 3 
+4 2 6 8 5 3 7 9 1 
+7 1 3 9 2 4 8 5 6
+9 6 1 5 3 7 2 8 4
+2 8 7 4 1 9 6 3 5
+3 4 5 2 8 6 1 7 9
+*/
